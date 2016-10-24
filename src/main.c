@@ -12,22 +12,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-/* Buffer used for transmission */
-uint8_t aTxBuffer[] =
-    " ****UART_TwoBoards_ComIT****  ****UART_TwoBoards_ComIT****  ****UART_TwoBoards_ComIT**** ";
-//uint8_t aTxBuffer[] = "";
-/* Buffer used for reception */
-uint8_t aRxBuffer[RXBUFFERSIZE];
-
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 void Error_Handler(void);
 
-
 int main(void)
 {
-	/* Init system clock for maximum system speed */
-//	TM_RCC_InitSystem();
+
 	/* STM32F4xx HAL library initialization:
 	 - Configure the Flash prefetch, instruction and Data caches
 	 - Configure the Systick to generate an interrupt each 1 msec
@@ -36,11 +27,11 @@ int main(void)
 	 */
 	HAL_Init();
 
-  /* Configure LED3, LED4, LED5 and LED6 */
-  BSP_LED_Init(LED3);
-  BSP_LED_Init(LED4);
-  BSP_LED_Init(LED5);
-  BSP_LED_Init(LED6);
+	/* Configure LED3, LED4, LED5 and LED6 */
+	BSP_LED_Init(LED3);
+	BSP_LED_Init(LED4);
+	BSP_LED_Init(LED5);
+	BSP_LED_Init(LED6);
 
 	/* Configure the system clock to 168 MHz */
 	SystemClock_Config();
@@ -53,55 +44,34 @@ int main(void)
 	 - Parity = None
 	 - BaudRate = 9600 baud
 	 - Hardware flow control disabled (RTS and CTS signals) */
-	UARTX_Init();
+	//UARTX_Init();
+	UART_PC_Init();
 
-	/* Configure USER Button */
-	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
+//	/* Configure USER Button */
+//	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
+//
+//	/* Wait for USER Button press before starting the Communication */
+//	while (BSP_PB_GetState(BUTTON_KEY) == RESET)
+//	{
+//		/* Toggle LED3 waiting for user to press button */
+//		BSP_LED_Toggle(LED3);
+//		HAL_Delay(40);
+//	}
+//
+//	/* Wait for USER Button release before starting the Communication */
+//	while (BSP_PB_GetState(BUTTON_KEY) == SET)
+//	{
+//	}
+//
 
-	/* Wait for USER Button press before starting the Communication */
-	while (BSP_PB_GetState(BUTTON_KEY) == RESET)
-	{
-		/* Toggle LED3 waiting for user to press button */
-		BSP_LED_Toggle(LED3);
-		HAL_Delay(40);
-	}
-
-	/* Wait for USER Button release before starting the Communication */
-	while (BSP_PB_GetState(BUTTON_KEY) == SET)
-	{
-	}
-
-	/* Turn LED3 off */
-	BSP_LED_Off(LED3);
-
-	UARTX_Transmit((uint8_t*)aTxBuffer, TXBUFFERSIZE);
-
-  /*##-3- Wait for the end of the transfer ###################################*/
-  while (UARTX_GetStatus() != SET)
-  {
-  }
-
-  /* Reset transmission flag */
-  UARTX_SetStatus(RESET);
-
-  UARTX_Receive((uint8_t*)aRxBuffer, 5);
-
-  /*##-5- Wait for the end of the transfer ###################################*/
-  while (UARTX_GetStatus() != SET)
-  {
-  }
-
-  /* Reset transmission flag */
-  UARTX_SetStatus(RESET);
 
 	/* Infinite loop */
 	while (1)
 	{
+
 	}
 
 }
-
-
 
 /**
  * @brief  System Clock Configuration
@@ -172,8 +142,6 @@ static void SystemClock_Config(void)
 	}
 }
 
-
-
 /**
  * @brief  This function is executed in case of error occurrence.
  * @param  None
@@ -182,8 +150,9 @@ static void SystemClock_Config(void)
 void Error_Handler(void)
 {
 	/* Turn LED5 on */
-	BSP_LED_On(LED5);
 	while (1)
 	{
+		HAL_Delay(500);
+		BSP_LED_Toggle(LED6);
 	}
 }

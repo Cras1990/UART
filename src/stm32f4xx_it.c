@@ -54,7 +54,9 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* UART handler declared in "main.c" file */
-extern UART_HandleTypeDef UartHandle;
+extern UART_HandleTypeDef UartHandle_X;
+extern UART_HandleTypeDef UartHandle_PC;
+extern TIM_HandleTypeDef htim2;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -175,10 +177,20 @@ void SysTick_Handler(void)
   */
 void USARTx_IRQHandler(void)
 {
-  HAL_UART_IRQHandler(& UartHandle);
+  HAL_UART_IRQHandler(&UartHandle_X);
 }
 
-
+/**
+  * @brief  This function handles UART2 interrupt request.
+  * @param  None
+  * @retval None
+  * @Note   This function is redefined in "main.h" and related to DMA stream
+  *         used for USART2 data transmission
+  */
+void USART2_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&UartHandle_PC);
+}
 
 /**
   * @brief  This function handles PPP interrupt request.
@@ -188,6 +200,23 @@ void USARTx_IRQHandler(void)
 /*void PPP_IRQHandler(void)
 {
 }*/
+
+/**
+ * @brief This function handles TIM2 global interrupt.
+ */
+void TIM2_IRQHandler(void) {
+	/* USER CODE BEGIN TIM2_IRQn 0 */
+
+	/* USER CODE END TIM2_IRQn 0 */
+	HAL_NVIC_ClearPendingIRQ(TIM2_IRQn);
+	HAL_TIM_IRQHandler(&htim2);
+	/* USER CODE BEGIN TIM2_IRQn 1 */
+	// Ich kann entweder hier oder auch in der Methode 'HAL_TIM_PeriodElapsedCallback'
+	// etwas zum Ausfuehren eintippen, denn letztere wird auch in der Methode
+	// 'HAL_TIM_IRQHandler' aufgerufen
+	//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	/* USER CODE END TIM2_IRQn 1 */
+}
 
 
 /**
