@@ -39,7 +39,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
-#include "GSM_UART.h"
+//#include "GSM_UART.h"
    
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{

@@ -8,7 +8,6 @@
 #ifndef GSM_UART_H_
 #define GSM_UART_H_
 
-#include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
 
 /* User can use this section to tailor USARTx/UARTx instance used and associated
@@ -69,9 +68,6 @@
 void UARTX_Init(void);
 void UART_PC_Init(void);
 void UARTX_Transmit(void);
-void UARTX_Receive(uint8_t *pData, uint16_t Size);
-void UARTPC_Transmit(void);
-void UARTPC_Handler(void);
 uint8_t UARTX_GetStatus(void);
 void UARTX_SetStatus(uint8_t status);
 void UARTX_GSM_PinsInit(void);

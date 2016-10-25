@@ -1,8 +1,7 @@
 #include "GSM_UART.h"
-#include "stm32f4xx.h"
 #include "led_button.h"
-#include "GSM_TIM.h"
-#include "string.h"
+//#include "GSM_TIM.h"
+
 
 /* Private variables ---------------------------------------------------------*/
 /* UART handler declaration */
@@ -13,9 +12,9 @@ uint8_t str2comp[] = "\r\nOK\r\n";
 __IO uint8_t aTxBuffer[100];
 __IO uint8_t ptr_tx_pc_count = 0;
 /* Buffer used for reception */
-//uint8_t aRxBuffer[RXBUFFERSIZE+2];
 __IO uint8_t aRxBuffer[100];
-__IO uint8_t aRxBuffer_dummy;
+__IO uint8_t aRx_PC_Buffer_dummy;
+__IO uint8_t aRx_X_Buffer_dummy;
 __IO uint8_t ptr_rx_pc_count = 0;
 
 __IO ITStatus UartReady = RESET;
@@ -24,6 +23,9 @@ extern void Error_Handler(void);
 static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2,
     uint16_t BufferLength);
 static void UARTPC_SaveChar(void);
+static void UART_Handler(UART_HandleTypeDef *UartHandle);
+static void UARTPC_Transmit(void);
+void dbg_cb( char *response );
 
 void GSM_ConfigComm()
 {
@@ -91,7 +93,46 @@ void UARTX_Init()
 		Error_Handler();
 	}
 
+	//Init pwrkey pin
 	UARTX_GSM_PinsInit();
+
+	/*##-4- Put UART peripheral in reception process ###########################*/
+	if (HAL_UART_Receive_IT(&UartHandle_X, &aRx_X_Buffer_dummy, 1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+//PWRKEY wird gesetzt
+void UARTX_GSM_PinsInit()
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	/* Enable GPIOC clock */
+	__HAL_RCC_GPIOE_CLK_ENABLE()
+	;
+
+	/* Configure PA0 pin as input floating */
+	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStructure.Pull = GPIO_PULLUP;
+	GPIO_InitStructure.Pin = GPIO_PIN_4;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+}
+
+void dbg_cb( char *response )
+{
+	uint8_t tmp[] = " < CALLBACK >\r\n";
+	if (HAL_UART_Transmit_IT(&UartHandle_X, tmp, COUNTOF(tmp)) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_UART_Transmit_IT(&UartHandle_X, response, COUNTOF(response)) != HAL_OK)
+	{
+		Error_Handler();
+	}
 }
 
 void UART_PC_Init()
@@ -114,30 +155,13 @@ void UART_PC_Init()
 	//MX_TIM2_Init();
 
 	/*##-4- Put UART peripheral in reception process ###########################*/
-	if (HAL_UART_Receive_IT(&UartHandle_PC, &aRxBuffer_dummy, 1) != HAL_OK)
+	if (HAL_UART_Receive_IT(&UartHandle_PC, &aRx_PC_Buffer_dummy, 1) != HAL_OK)
 	{
 		Error_Handler();
 	}
 
-}
+	//gsm_engine_init( dbg_cb );
 
-//PWRKEY wird gesetzt
-void UARTX_GSM_PinsInit()
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	/* Enable GPIOC clock */
-	__HAL_RCC_GPIOE_CLK_ENABLE()
-	;
-
-	/* Configure PA0 pin as input floating */
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Pull = GPIO_PULLUP;
-	GPIO_InitStructure.Pin = GPIO_PIN_4;
-	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
-
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
 }
 
 void UARTX_Transmit()
@@ -149,19 +173,6 @@ void UARTX_Transmit()
 	{
 		Error_Handler();
 	}
-
-	/*##-3- Wait for the end of the transfer ###################################*/
-	while (UARTX_GetStatus() != SET)
-	{
-	}
-
-	/* Reset transmission flag */
-	UARTX_SetStatus(RESET);
-//  if(HAL_UART_Transmit(&UartHandle_X, pData, Size, 5000)!= HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-//  BSP_LED_On(LED6);
 }
 
 void UARTX_Receive(uint8_t *pData, uint16_t Size)
@@ -171,46 +182,43 @@ void UARTX_Receive(uint8_t *pData, uint16_t Size)
 	{
 		Error_Handler();
 	}
-
-	/*##-5- Wait for the end of the transfer ###################################*/
-	while (UARTX_GetStatus() != SET)
-	{
-
-	}
-	/* Reset transmission flag */
-	UARTX_SetStatus(RESET);
-
-//  if(HAL_UART_Receive(&UartHandle_X, pData, Size, 5000) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-//
-//  /* Turn LED4 on: Transfer in reception process is correct */
-//  BSP_LED_On(LED4);
 }
 
 void UARTPC_Transmit()
 {
-
-//	if (HAL_UART_Transmit_IT(&UartHandle_PC, aTxBuffer, ptr_tx_pc_count) != HAL_OK)
-	if (HAL_UART_Transmit_IT(&UartHandle_PC, aRxBuffer, ptr_tx_pc_count) != HAL_OK)
+	// hierbei gehe ich davon aus, dass der buffer aRxBuffer
+	// sowohl fürs Abspeichern von einkommenden Daten vom
+	// PC als auch vom Modem
+	if (HAL_UART_Transmit_IT(&UartHandle_PC, aRxBuffer, ptr_tx_pc_count)
+	    != HAL_OK)
+//	if (HAL_UART_Transmit_IT(UartHandle, aRxBuffer, ptr_tx_pc_count) != HAL_OK)
 	{
 		Error_Handler();
 	}
 }
 
-void UARTPC_Handler()
+void UART_Handler(UART_HandleTypeDef *UartHandle)
 {
-	// start again the uart receive process
-	if (HAL_UART_Receive_IT(&UartHandle_PC, &aRxBuffer_dummy, 1) != HAL_OK)
+	if (UartHandle->Instance == USART2)
 	{
-		Error_Handler();
+		// start again the uart receive process
+		if (HAL_UART_Receive_IT(&UartHandle_PC, &aRx_PC_Buffer_dummy, 1) != HAL_OK)
+		{
+			Error_Handler();
+		}
+	} else
+	{
+		// start again the uart receive process
+		if (HAL_UART_Receive_IT(&UartHandle_X, &aRx_X_Buffer_dummy, 1) != HAL_OK)
+		{
+			Error_Handler();
+		}
 	}
 }
 
 void UARTPC_SaveChar()
 {
-	aRxBuffer[ptr_rx_pc_count++] = aRxBuffer_dummy;
+	aRxBuffer[ptr_rx_pc_count++] = aRx_PC_Buffer_dummy;
 }
 
 /**
@@ -224,17 +232,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if (UartHandle->Instance == USARTx)
 	{
-		/* Set transmission flag: transfer complete */
-		UARTX_SetStatus(SET);
-		/* Turn LED4 on: Transfer in reception process is correct */
-		BSP_LED_On(LED4);
-	} else if (UartHandle->Instance == USART2)
-	{
-
 		// die Reihenfolge, wie folgende Aufrufe durchgeführt werden, spielt eine Rolle, also nicht vertauschen
 		//speichere char in empfangsbuffer vom pc
 		UARTPC_SaveChar();
-		if (ptr_rx_pc_count == COUNTOF(aRxBuffer) || aRxBuffer_dummy == '\r')
+		if (ptr_rx_pc_count == COUNTOF(aRxBuffer) || aRx_X_Buffer_dummy == '\r')
 		{
 			// copy the number of bytes to send to remote device
 			ptr_tx_pc_count = ptr_rx_pc_count;
@@ -245,9 +246,28 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 			/* Turn LED4 on: Transfer in reception process is correct */
 			BSP_LED_Toggle(LED4);
 		}
-		// reactivate on the receive process once again
-		UARTPC_Handler();
+		//at_adapter_rx( aRx_X_Buffer_dummy );
+	} else if (UartHandle->Instance == USART2)
+	{
+		// die Reihenfolge, wie folgende Aufrufe durchgeführt werden, spielt eine Rolle, also nicht vertauschen
+		//speichere char in empfangsbuffer vom pc
+		UARTPC_SaveChar();
+		if (ptr_rx_pc_count == COUNTOF(aRxBuffer) || aRx_PC_Buffer_dummy == '\r')
+		{
+			// copy the number of bytes to send to remote device
+			ptr_tx_pc_count = ptr_rx_pc_count;
+			// reset the pointer to the pc_rx_buffer
+			ptr_rx_pc_count = 0;
+			// send the received command from pc to remote device
+			UARTPC_Transmit();
+			//UARTX_Transmit();
+			/* Turn LED3 on: Transfer in reception process is correct */
+			BSP_LED_Toggle(LED3);
+		}
+//		UART_Handler(UartHandle);
 	}
+	// reactivate on the receive process once again
+	UART_Handler(UartHandle);
 }
 
 /**
@@ -262,13 +282,13 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 	if (UartHandle->Instance == USARTx)
 	{
 		/* Set transmission flag: transfer complete */
-		UARTX_SetStatus(SET);
-		/* Turn LED6 on: Transfer in transmission process is correct */
-		BSP_LED_On(LED6);
+//		UARTX_SetStatus(SET);
+//		/* Turn LED5 on: Transfer in transmission process to modem is correct */
+//		BSP_LED_On(LED5);
 	} else if (UartHandle->Instance == USART2) // dies wird wahrsch. nicht gebraucht. Ich sollte wahrscheinlich USART2 nur als empfaenger Einstellen
 	{
-		/* Turn LED4 on: Transfer in transmition process is correct */
-		BSP_LED_Toggle(LED5);
+		/* Turn LED5 on: Transfer in transmition process to PC is correct */
+		//BSP_LED_Toggle(LED5);
 	}
 }
 
@@ -281,8 +301,8 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
  */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
 {
-	/* Turn LED3 on: Transfer error in reception/transmission process */
-	BSP_LED_On(LED3);
+	/* Turn LED6 on: Transfer error in reception/transmission process */
+	BSP_LED_On(LED6);
 }
 
 uint8_t UARTX_GetStatus()

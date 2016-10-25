@@ -2,7 +2,9 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
 #include "led_button.h"
-#include "GSM_UART.h"
+//#include "GSM_UART.h"
+#include "protocol.h"
+
 /* Include my libraries here */
 //#include "defines.h"
 //#include "tm_stm32_disco.h"
@@ -44,8 +46,10 @@ int main(void)
 	 - Parity = None
 	 - BaudRate = 9600 baud
 	 - Hardware flow control disabled (RTS and CTS signals) */
-	//UARTX_Init();
-	UART_PC_Init();
+//	UARTX_Init();
+//	UART_PC_Init();
+	protocol_Init();
+
 
 //	/* Configure USER Button */
 //	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
@@ -63,12 +67,11 @@ int main(void)
 //	{
 //	}
 //
-
-
+	//at_cmd( "AT" );
 	/* Infinite loop */
 	while (1)
 	{
-
+		//gsm_process();
 	}
 
 }
