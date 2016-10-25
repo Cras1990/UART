@@ -8,6 +8,7 @@
 #ifndef GSM_TIM_H_
 #define GSM_TIM_H_
 
+#include "stm32f4xx_hal.h"
 
 void MX_TIM2_Init(void);
 uint8_t get_osTicks(void);

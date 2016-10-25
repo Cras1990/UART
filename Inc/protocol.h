@@ -10,6 +10,7 @@
 
 void protocol_Init(void);
 void protocol_Dispatcher(void);
+void protocol_Handler(void);
 
 
 #endif /* PROTOCOL_H_ */

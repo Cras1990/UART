@@ -66,12 +66,17 @@
 
 /* Global function prototypes -----------------------------------------------*/
 void UARTX_Init(void);
-void UART_PC_Init(void);
 void UARTX_Transmit(void);
-uint8_t UARTX_GetStatus(void);
-void UARTX_SetStatus(uint8_t status);
 void UARTX_GSM_PinsInit(void);
 void GSM_ConfigComm(void);
 void sendATCommand(const char *command);
+
+//#PC
+void UART_PC_Init(void);
+uint8_t UART_GetStatus(void);
+void UART_SetStatus(uint8_t status);
+//void UART_PC_set_dataready(void);
+//uint8_t UART_PC_get_dataready(void);
+void UARTPC_Transmit(void);
 
 #endif /* GSM_UART_H_ */

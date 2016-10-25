@@ -58,6 +58,26 @@
  * @{
  */
 
+
+/**
+ * Initializes the Global MSP.
+ */
+void HAL_MspInit(void) {
+	/* USER CODE BEGIN MspInit 0 */
+
+	/* USER CODE END MspInit 0 */
+
+	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
+	/* System interrupt init*/
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
+	/* USER CODE BEGIN MspInit 1 */
+
+	/* USER CODE END MspInit 1 */
+}
+
 /**
  * @brief UART MSP Initialization
  *        This function configures the hardware resources used in this example:
@@ -101,7 +121,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
 		/*##-3- Configure the NVIC for UART ########################################*/
 		/* NVIC for USART1 */
-		HAL_NVIC_SetPriority(USARTx_IRQn, 0, 1);
+		HAL_NVIC_SetPriority(USARTx_IRQn, 2, 0);
 		HAL_NVIC_EnableIRQ(USARTx_IRQn);
 	} else if (huart->Instance == USART2)
 	{

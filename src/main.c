@@ -2,21 +2,18 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
 #include "led_button.h"
-//#include "GSM_UART.h"
 #include "protocol.h"
+#include "GSM_TIM.h"
 
-/* Include my libraries here */
-//#include "defines.h"
-//#include "tm_stm32_disco.h"
-//#include "tm_stm32_delay.h"
-//#include "tm_stm32_usart.h"
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-
-/* Private function prototypes -----------------------------------------------*/
+//TIM_HandleTypeDef htim2;
+///* Private function prototypes -----------------------------------------------*/
+//static void MX_TIM2_Init(void);
 static void SystemClock_Config(void);
 void Error_Handler(void);
+
 
 int main(void)
 {
@@ -29,14 +26,14 @@ int main(void)
 	 */
 	HAL_Init();
 
+	/* Configure the system clock to 168 MHz */
+	SystemClock_Config();
+
 	/* Configure LED3, LED4, LED5 and LED6 */
 	BSP_LED_Init(LED3);
 	BSP_LED_Init(LED4);
 	BSP_LED_Init(LED5);
 	BSP_LED_Init(LED6);
-
-	/* Configure the system clock to 168 MHz */
-	SystemClock_Config();
 
 	/*##-1- Configure the UART peripheral ######################################*/
 	/* Put the USART peripheral in the Asynchronous mode (UART Mode) */
@@ -49,32 +46,49 @@ int main(void)
 //	UARTX_Init();
 //	UART_PC_Init();
 	protocol_Init();
+	MX_TIM2_Init();
 
-
-//	/* Configure USER Button */
-//	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
-//
-//	/* Wait for USER Button press before starting the Communication */
-//	while (BSP_PB_GetState(BUTTON_KEY) == RESET)
-//	{
-//		/* Toggle LED3 waiting for user to press button */
-//		BSP_LED_Toggle(LED3);
-//		HAL_Delay(40);
-//	}
-//
-//	/* Wait for USER Button release before starting the Communication */
-//	while (BSP_PB_GetState(BUTTON_KEY) == SET)
-//	{
-//	}
-//
-	//at_cmd( "AT" );
 	/* Infinite loop */
 	while (1)
 	{
-		//gsm_process();
+		while (get_osTicks() > 0u)
+		{
+			/* Call the protocol handler each 1ms and clear global interrupt variable*/
+			reset_osTicks();
+			protocol_Handler();
+		}
 	}
 
 }
+
+///* TIM2 init function */
+//static void MX_TIM2_Init() {
+//
+//  TIM_ClockConfigTypeDef sClockSourceConfig;
+//  TIM_MasterConfigTypeDef sMasterConfig;
+//
+//  htim2.Instance = TIM2;
+//  htim2.Init.Prescaler = 16800;
+//  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+//  htim2.Init.Period = 5000;
+//  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+//  HAL_TIM_Base_Init(&htim2);
+//
+////  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+////  HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
+////
+////  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+////  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+////  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
+//
+//}
+//
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+//  if(htim->Instance == TIM2){
+//  	BSP_LED_Toggle(LED3);
+//    // tue irgendetwas
+//  }
+//}
 
 /**
  * @brief  System Clock Configuration
@@ -98,19 +112,14 @@ int main(void)
  */
 static void SystemClock_Config(void)
 {
-	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 	RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-	/* Enable Power Control clock */
-	__HAL_RCC_PWR_CLK_ENABLE()
+	__PWR_CLK_ENABLE()
 	;
 
-	/* The voltage scaling allows optimizing the power consumption when the device is
-	 clocked below the maximum system frequency, to update the voltage scaling value
-	 regarding system frequency refer to product datasheet.  */
 	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-	/* Enable HSE Oscillator and activate PLL with HSE as source */
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -119,30 +128,22 @@ static void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLN = 336;
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
 	RCC_OscInitStruct.PLL.PLLQ = 7;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-	/* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
-	 clocks dividers */
-	RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
-	    | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1
+			| RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-	{
-		Error_Handler();
-	}
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
 
-	/* STM32F405x/407x/415x/417x Revision Z devices: prefetch is supported  */
-	if (HAL_GetREVID() == 0x1001)
-	{
-		/* Enable the Flash prefetch */
-		__HAL_FLASH_PREFETCH_BUFFER_ENABLE();
-	}
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
+
+	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+	/* SysTick_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /**
