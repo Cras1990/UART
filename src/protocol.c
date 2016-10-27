@@ -9,8 +9,9 @@
 #include "GSM_UART.h"
 #include "GSM_DIO.h"
 #include "led_button.h"
+#include "GSM_Modul.h"
 #include "GSM_TIM.h"
-#include "GSM_DIO.h"
+#include "gsm_adapter.h"
 
 extern uint8_t aRx_PC_Buffer[100];
 
@@ -19,18 +20,26 @@ static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2,
 
 void protocol_Init()
 {
-	UARTX_Init();
-	UART_PC_Init();
+	GSM_Modul_Init();
+	MX_TIM2_Init();
 }
 
 void protocol_Dispatcher()
 {
 	if (!Buffercmp("InitModul\r", aRx_PC_Buffer, COUNTOF("InitModul\r")))
 	{
-//		GSM_DIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+		//GSM_Modul_ConfigComm();
+		at_adapter_init();
 		BSP_LED_Toggle(LED5);
+	} else if (!Buffercmp("AT\r", aRx_PC_Buffer, COUNTOF("AT\r")))
+	{
+		sendATCommand("AT\r");
+//		BSP_LED_Toggle(LED6);
+	} else if (!Buffercmp("ATI\r", aRx_PC_Buffer, COUNTOF("ATI\r")))
+	{
+		sendATCommand("ATI\r");
+		//		BSP_LED_Toggle(LED6);
 	}
-
 }
 
 void protocol_Handler()

@@ -12,7 +12,9 @@
 ///* Private function prototypes -----------------------------------------------*/
 //static void MX_TIM2_Init(void);
 static void SystemClock_Config(void);
-void Error_Handler(void);
+void Error_HandlerPC(void);
+void Error_HandlerX(void);
+void Error_HandlerTIM(void);
 
 
 int main(void)
@@ -43,10 +45,7 @@ int main(void)
 	 - Parity = None
 	 - BaudRate = 9600 baud
 	 - Hardware flow control disabled (RTS and CTS signals) */
-//	UARTX_Init();
-//	UART_PC_Init();
 	protocol_Init();
-	MX_TIM2_Init();
 
 	/* Infinite loop */
 	while (1)
@@ -60,35 +59,6 @@ int main(void)
 	}
 
 }
-
-///* TIM2 init function */
-//static void MX_TIM2_Init() {
-//
-//  TIM_ClockConfigTypeDef sClockSourceConfig;
-//  TIM_MasterConfigTypeDef sMasterConfig;
-//
-//  htim2.Instance = TIM2;
-//  htim2.Init.Prescaler = 16800;
-//  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-//  htim2.Init.Period = 5000;
-//  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-//  HAL_TIM_Base_Init(&htim2);
-//
-////  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-////  HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
-////
-////  sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-////  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-////  HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
-//
-//}
-//
-//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-//  if(htim->Instance == TIM2){
-//  	BSP_LED_Toggle(LED3);
-//    // tue irgendetwas
-//  }
-//}
 
 /**
  * @brief  System Clock Configuration
@@ -151,12 +121,43 @@ static void SystemClock_Config(void)
  * @param  None
  * @retval None
  */
-void Error_Handler(void)
+void Error_HandlerPC(void)
 {
 	/* Turn LED5 on */
 	while (1)
 	{
 		HAL_Delay(500);
+		BSP_LED_Toggle(LED6);
+	}
+}
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @param  None
+ * @retval None
+ */
+void Error_HandlerX(void)
+{
+	/* Turn LED5 on */
+	while (1)
+	{
+		HAL_Delay(500);
+		BSP_LED_Toggle(LED4);
+	}
+}
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @param  None
+ * @retval None
+ */
+void Error_HandlerTIM(void)
+{
+	/* Turn LED5 on */
+	while (1)
+	{
+		HAL_Delay(500);
+		BSP_LED_Toggle(LED4);
 		BSP_LED_Toggle(LED6);
 	}
 }

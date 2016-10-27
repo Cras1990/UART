@@ -121,7 +121,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
 		/*##-3- Configure the NVIC for UART ########################################*/
 		/* NVIC for USART1 */
-		HAL_NVIC_SetPriority(USARTx_IRQn, 2, 0);
+		HAL_NVIC_SetPriority(USARTx_IRQn, 3, 0);
 		HAL_NVIC_EnableIRQ(USARTx_IRQn);
 	} else if (huart->Instance == USART2)
 	{
@@ -151,7 +151,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
 		/*##-3- Configure the NVIC for UART ########################################*/
 		/* NVIC for USART1 */
-		HAL_NVIC_SetPriority(USART2_IRQn, 1, 0);
+		HAL_NVIC_SetPriority(USART2_IRQn, 4, 0);
 		HAL_NVIC_EnableIRQ(USART2_IRQn);
 	}
 }
@@ -207,7 +207,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base) {
 		__TIM2_CLK_ENABLE()
 		;
 		/* Peripheral interrupt init*/
-		HAL_NVIC_SetPriority(TIM2_IRQn, 3, 0);
+		HAL_NVIC_SetPriority(TIM2_IRQn, 2, 0);
 		HAL_NVIC_EnableIRQ(TIM2_IRQn);
 		/* USER CODE BEGIN TIM2_MspInit 1 */
 

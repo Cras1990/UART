@@ -3,14 +3,11 @@
 
 TIM_HandleTypeDef htim2;
 __IO uint8_t osTicks;
-extern void Error_Handler();
+extern void Error_HandlerTIM();
 
 /** TIM2 init function
  **/
 void MX_TIM2_Init() {
-
-	TIM_ClockConfigTypeDef sClockSourceConfig;
-	TIM_MasterConfigTypeDef sMasterConfig;
 
 	htim2.Instance = TIM2;
 	htim2.Init.Prescaler = 0;
@@ -20,20 +17,13 @@ void MX_TIM2_Init() {
 	if(HAL_TIM_Base_Init(&htim2) != HAL_OK)
 	{
     /* Initialization Error */
-    Error_Handler();
+    Error_HandlerTIM();
 	}
-
-//	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-//	HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig);
-//
-//	sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-//	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-//	HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig);
 
 	if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK)
 	{ // Initialisierung Timer schon bevor Messung startet
 		/* Counter Enable Error */
-		Error_Handler();
+		Error_HandlerTIM();
 	}
 
 }
@@ -49,7 +39,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2)
 	{
 		osTicks++; //ueberlauf, wenn ich dies nicht handle
-		//BSP_LED_Toggle(LED3);
 	}
 
 }
