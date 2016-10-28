@@ -15,6 +15,7 @@ static void SystemClock_Config(void);
 void Error_HandlerPC(void);
 void Error_HandlerX(void);
 void Error_HandlerTIM(void);
+extern void gsm_process();
 
 
 int main(void)
@@ -55,6 +56,7 @@ int main(void)
 			/* Call the protocol handler each 1ms and clear global interrupt variable*/
 			reset_osTicks();
 			protocol_Handler();
+			gsm_process();
 		}
 	}
 

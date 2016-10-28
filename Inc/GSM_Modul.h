@@ -11,7 +11,7 @@
 #include "stm32f4xx_hal.h"
 
 void GSM_Modul_ConfigComm(void);
-void sendATCommand(const uint8_t *command);
+void sendATCommand();
 void GSM_Modul_Init(void);
 
 

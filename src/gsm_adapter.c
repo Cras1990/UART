@@ -59,6 +59,7 @@ static char error[AT_HEADER_SIZE];
  *******************************************************************************/
 
 extern void UARTPC_Transmit(uint8_t *command, uint8_t size);
+extern uint8_t aTx_PC_Buffer[100];
 
 /******************************************************************************
  * Private Function Definitions
@@ -313,7 +314,8 @@ void gsm_process()
 //        at_adapter_reset();
 
 //        timeout_f = false;
-		UARTPC_Transmit(rx_buffer, rx_idx);
+		memcpy(aTx_PC_Buffer, rx_buffer, rx_idx);
+		UARTPC_Transmit(aTx_PC_Buffer, rx_idx);
 		at_adapter_reset();
 		exception_f = false;
 		response_f = false;

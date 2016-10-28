@@ -9,6 +9,10 @@
 #include "GSM_DIO.h"
 #include "GSM_UART.h"
 
+extern uint8_t aRx_PC_Buffer[100];
+extern __IO uint8_t ptr_tx_x_count;
+
+
 void GSM_Modul_ConfigComm()
 {
 	//PWRKEY wird dadurch angesteuert
@@ -20,9 +24,9 @@ void GSM_Modul_ConfigComm()
 	HAL_Delay(12500);
 }
 
-void sendATCommand(const uint8_t *command)
+void sendATCommand()
 {
-	UARTX_Transmit(command,COUNTOF(command));
+	UARTX_Transmit(aRx_PC_Buffer,ptr_tx_x_count);
 }
 
 void GSM_Modul_Init()

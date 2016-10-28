@@ -9,8 +9,9 @@ UART_HandleTypeDef UartHandle_X;
 UART_HandleTypeDef UartHandle_PC;
 
 uint8_t aTxBuffer[100];
-uint8_t aRxBuffer[100];
+//uint8_t aRxBuffer[100];
 uint8_t aRx_PC_Buffer[100];
+uint8_t aTx_PC_Buffer[100];
 __IO uint8_t ptr_tx_pc_count = 0;
 __IO uint8_t ptr_rx_pc_count = 0;
 __IO uint8_t aRx_PC_Buffer_dummy;
@@ -32,7 +33,8 @@ void UARTX_Init()
 
 	UartHandle_X.Instance = USARTx;
 
-	UartHandle_X.Init.BaudRate = 9600;
+//	UartHandle_X.Init.BaudRate = 9600;
+		UartHandle_X.Init.BaudRate = 115200;
 	UartHandle_X.Init.WordLength = UART_WORDLENGTH_8B;
 	UartHandle_X.Init.StopBits = UART_STOPBITS_1;
 	UartHandle_X.Init.Parity = UART_PARITY_NONE;
@@ -88,10 +90,10 @@ void UARTX_Transmit(uint8_t *command, uint8_t size)
 	}
 }
 
-void UARTX_SaveChar()
-{
-	aRxBuffer[ptr_rx_x_count++] = aRx_X_Buffer_dummy;
-}
+//void UARTX_SaveChar()
+//{
+//	aRxBuffer[ptr_rx_x_count++] = aRx_X_Buffer_dummy;
+//}
 
 void UART_Handler(UART_HandleTypeDef *UartHandle)
 {
@@ -134,7 +136,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 //			BSP_LED_Toggle(LED6);
 //		}
 		at_adapter_rx( aRx_X_Buffer_dummy );
-		gsm_process();
+//		gsm_process();
 
 	} else if (UartHandle->Instance == USART2)
 	{
@@ -145,12 +147,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 		    || aRx_PC_Buffer_dummy == '\r')
 		{
 			// copy the number of bytes to send to remote device
-			ptr_tx_pc_count = ptr_rx_pc_count;
+			ptr_tx_x_count = ptr_rx_pc_count;
 			// reset the pointer to the pc_rx_buffer
 			ptr_rx_pc_count = 0;
 			// send the received command from pc to remote device
 			//UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
-			memcpy(aRxBuffer, aRx_PC_Buffer, ptr_tx_pc_count);
+			//memcpy(aRxBuffer, aRx_PC_Buffer, ptr_tx_pc_count);
 			/* Turn LED3 on: Transfer in reception process is correct */
 			BSP_LED_Toggle(LED3);
 			// data ready to be read or sent to remote device
@@ -255,7 +257,8 @@ void UARTPC_Transmit(uint8_t *command, uint8_t size)
 	// sowohl fürs Abspeichern von einkommenden Daten vom
 	// PC als auch vom Modem
 	//if (HAL_UART_Transmit_IT(&UartHandle_PC, aRx_PC_Buffer, ptr_tx_pc_count)
-	if (HAL_UART_Transmit_IT(&UartHandle_PC, command, size) != HAL_OK)
+	HAL_StatusTypeDef hola = HAL_UART_Transmit_IT(&UartHandle_PC, command, size);
+	if (hola != HAL_OK)
 	{
 		Error_HandlerPC();
 	}

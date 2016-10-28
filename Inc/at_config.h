@@ -54,8 +54,8 @@
  * @link at_buffer.h @endlink
  * This is the maximum amount of characters that can be transfered per one
  * sequence in both directions. */
-//#define AT_TRANSFER_SIZE                                1024
-#define AT_TRANSFER_SIZE                                100
+#define AT_TRANSFER_SIZE                                1024
+//#define AT_TRANSFER_SIZE                                100
 /**
  * Default timeout in milliseconds for the specific module */
 #define DEFAULT_TIMEOUT                                 500
