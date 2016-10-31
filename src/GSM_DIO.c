@@ -12,3 +12,9 @@ void GSM_DIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinS
 	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, PinState);
 }
 
+
+uint8_t GSM_DIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+	return HAL_GPIO_ReadPin(GPIOx, GPIO_Pin);
+}
+

@@ -34,7 +34,7 @@ void UARTX_Init()
 	UartHandle_X.Instance = USARTx;
 
 //	UartHandle_X.Init.BaudRate = 9600;
-		UartHandle_X.Init.BaudRate = 115200;
+	UartHandle_X.Init.BaudRate = 115200;
 	UartHandle_X.Init.WordLength = UART_WORDLENGTH_8B;
 	UartHandle_X.Init.StopBits = UART_STOPBITS_1;
 	UartHandle_X.Init.Parity = UART_PARITY_NONE;
@@ -63,17 +63,26 @@ void UARTX_GSM_PinsInit()
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* Enable GPIOC clock */
-	__HAL_RCC_GPIOE_CLK_ENABLE()
-	;
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
 
-	/* Configure PA0 pin as input floating */
+	/* Configure PE4 pin as output pwrkey*/
 	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStructure.Pull = GPIO_PULLUP;
 	GPIO_InitStructure.Pin = GPIO_PIN_4;
 	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-	//HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
+	/* Configure PE5 pin as output RTS*/
+	GPIO_InitStructure.Pin = GPIO_PIN_5;
+	HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+	/* Configure PD2 pin as input CTS*/
+	GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	GPIO_InitStructure.Pin = GPIO_PIN_2;
+	HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
+
 }
 
 void UARTX_Transmit(uint8_t *command, uint8_t size)
@@ -135,7 +144,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 //			UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
 //			BSP_LED_Toggle(LED6);
 //		}
-		at_adapter_rx( aRx_X_Buffer_dummy );
+		at_adapter_rx(aRx_X_Buffer_dummy);
 //		gsm_process();
 
 	} else if (UartHandle->Instance == USART2)

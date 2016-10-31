@@ -15,7 +15,7 @@
 // Momentan ist dieser Aufruf redundant, da ueber den Headerfile
 // bereits die GPIO-Funktionalitaeten eingebunden sind
 void GSM_DIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState);
-
+uint8_t GSM_DIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 
 
 #endif /* GSM_DIO_H_ */

@@ -90,6 +90,11 @@ void at_adapter_init(void)
 	err_c = 0;
 	err_f = false;
 
+	//gsm_engine variable initialisations
+  exception_f   = false;
+  response_f    = false;
+  cue_f         = false;
+
 	strcpy(error, (char*) AT_CMS_ERROR);
 
 	//memset( ( void* )tx_buffer, 0, AT_TRANSFER_SIZE );
@@ -112,6 +117,7 @@ void at_adapter_reset(void)
 	summ_t = false;
 
 	//gsm_rx_ctl( true );
+	GSM_Modul_rxctrl(true);
 }
 
 uint16_t get_rx_idx()
@@ -314,6 +320,7 @@ void gsm_process()
 //        at_adapter_reset();
 
 //        timeout_f = false;
+		GSM_Modul_rxctrl(false);
 		memcpy(aTx_PC_Buffer, rx_buffer, rx_idx);
 		UARTPC_Transmit(aTx_PC_Buffer, rx_idx);
 		at_adapter_reset();

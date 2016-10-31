@@ -28,27 +28,12 @@ void protocol_Dispatcher()
 {
 	if (!Buffercmp("InitModul\r", aRx_PC_Buffer, COUNTOF("InitModul\r")))
 	{
-		//GSM_Modul_ConfigComm();
 		at_adapter_init();
 		BSP_LED_Toggle(LED5);
-	} //else if (!Buffercmp("AT\r", aRx_PC_Buffer, COUNTOF("AT\r")))
-//	{
-//		sendATCommand("AT\r");
-////		BSP_LED_Toggle(LED6);
-//	} else if (!Buffercmp("ATI\r", aRx_PC_Buffer, COUNTOF("ATI\r")))
-//	{
-//		sendATCommand("ATI\r");
-//		//		BSP_LED_Toggle(LED6);
-//	}
-//	else if (!Buffercmp("AT+GMM\r", aRx_PC_Buffer, COUNTOF("AT+GMM\r")))
-//		{
-//			sendATCommand("AT+GMI?\r");
-//			//		BSP_LED_Toggle(LED6);
-//		}
+	}
 	else
 	{
-		//uint8_t *tmp = (uint8_t *) malloc(size * sizeof(int));;
-		sendATCommand("AT+GMI?\r");
+		GSM_Modul_sendATCommand();
 	}
 }
 

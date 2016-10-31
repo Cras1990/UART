@@ -11,8 +11,10 @@
 #include "stm32f4xx_hal.h"
 
 void GSM_Modul_ConfigComm(void);
-void sendATCommand();
+void GSM_Modul_sendATCommand(void);
 void GSM_Modul_Init(void);
 
+uint8_t GSM_Modul_txctrl(void);
+void GSM_Modul_rxctrl(GPIO_PinState PinState);
 
 #endif /* GSM_MODUL_H_ */
