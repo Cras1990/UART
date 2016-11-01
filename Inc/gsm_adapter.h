@@ -54,6 +54,7 @@ volatile bool            cue_f;
 
 //extern volatile char            tx_buffer[ AT_TRANSFER_SIZE ];
 //extern volatile char            rx_buffer[ AT_TRANSFER_SIZE ];
+volatile char            tx_buffer[ AT_TRANSFER_SIZE ];
 volatile char            rx_buffer[ AT_TRANSFER_SIZE ];
 //extern uint8_t            aRxBuffer[100];
 //#define rx_buffer	aRxBuffer

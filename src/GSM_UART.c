@@ -33,8 +33,8 @@ void UARTX_Init()
 
 	UartHandle_X.Instance = USARTx;
 
-//	UartHandle_X.Init.BaudRate = 9600;
-	UartHandle_X.Init.BaudRate = 115200;
+	UartHandle_X.Init.BaudRate = 9600;
+//	UartHandle_X.Init.BaudRate = 115200;
 	UartHandle_X.Init.WordLength = UART_WORDLENGTH_8B;
 	UartHandle_X.Init.StopBits = UART_STOPBITS_1;
 	UartHandle_X.Init.Parity = UART_PARITY_NONE;
@@ -134,46 +134,36 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if (UartHandle->Instance == USARTx)
 	{
-//		if (ptr_rx_x_count == COUNTOF(aRxBuffer) || aRx_X_Buffer_dummy == '\r')
-//		UARTX_SaveChar();
-//		if (ptr_rx_x_count == 10)
-//		{
-//			ptr_tx_pc_count = ptr_rx_x_count;
-//			ptr_rx_x_count = 0;
-//			memcpy(aRx_PC_Buffer, aRxBuffer, ptr_tx_pc_count);
-//			UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
-//			BSP_LED_Toggle(LED6);
-//		}
+
 		at_adapter_rx(aRx_X_Buffer_dummy);
-//		gsm_process();
 
 	} else if (UartHandle->Instance == USART2)
 	{
-		// die Reihenfolge, wie folgende Aufrufe durchgeführt werden, spielt eine Rolle, also nicht vertauschen
-		//speichere char in empfangsbuffer vom pc
-		UARTPC_SaveChar();
-		if (ptr_rx_pc_count == COUNTOF(aRx_PC_Buffer)
-		    || aRx_PC_Buffer_dummy == '\r')
-		{
-			// copy the number of bytes to send to remote device
-			ptr_tx_x_count = ptr_rx_pc_count;
-			// reset the pointer to the pc_rx_buffer
-			ptr_rx_pc_count = 0;
-			// send the received command from pc to remote device
-			//UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
-			//memcpy(aRxBuffer, aRx_PC_Buffer, ptr_tx_pc_count);
-			/* Turn LED3 on: Transfer in reception process is correct */
-			BSP_LED_Toggle(LED3);
-			// data ready to be read or sent to remote device
-			// wichtig: hier werden die Kommandos an den Modem
-			// ueber polling gesendet. Dies kann spaeter zu Datenverlusten
-			// fuehren. Deshalb muss dieser Fall spaeter optimiert werden,
-			// wenn keine Daten ueber PC an den Modem gesendet werden sollen,
-			// sondern diese schon eigenstaendig vom uC gesendet werden.
-			// status: not already implemented!!
-			UART_SetStatus(SET);
-		}
-//		UART_Handler(UartHandle);
+		at_adapter_tx(aRx_PC_Buffer_dummy);
+//		// die Reihenfolge, wie folgende Aufrufe durchgeführt werden, spielt eine Rolle, also nicht vertauschen
+//		//speichere char in empfangsbuffer vom pc
+//		UARTPC_SaveChar();
+//		if (ptr_rx_pc_count == COUNTOF(aRx_PC_Buffer)
+//		    || aRx_PC_Buffer_dummy == '\r')
+//		{
+//			// copy the number of bytes to send to remote device
+//			ptr_tx_x_count = ptr_rx_pc_count;
+//			// reset the pointer to the pc_rx_buffer
+//			ptr_rx_pc_count = 0;
+//			// send the received command from pc to remote device
+//			//UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
+//			//memcpy(aRxBuffer, aRx_PC_Buffer, ptr_tx_pc_count);
+//			/* Turn LED3 on: Transfer in reception process is correct */
+//			BSP_LED_Toggle(LED3);
+//			// data ready to be read or sent to remote device
+//			// wichtig: hier werden die Kommandos an den Modem
+//			// ueber polling gesendet. Dies kann spaeter zu Datenverlusten
+//			// fuehren. Deshalb muss dieser Fall spaeter optimiert werden,
+//			// wenn keine Daten ueber PC an den Modem gesendet werden sollen,
+//			// sondern diese schon eigenstaendig vom uC gesendet werden.
+//			// status: not already implemented!!
+//			UART_SetStatus(SET);
+//		}
 	}
 	// reactivate on the receive process once again
 	UART_Handler(UartHandle);
@@ -239,7 +229,7 @@ void UART_PC_Init()
 
 	UartHandle_PC.Instance = USART2;
 
-	UartHandle_PC.Init.BaudRate = 9600;
+	UartHandle_PC.Init.BaudRate = 115200;
 	UartHandle_PC.Init.WordLength = UART_WORDLENGTH_8B;
 	UartHandle_PC.Init.StopBits = UART_STOPBITS_1;
 	UartHandle_PC.Init.Parity = UART_PARITY_NONE;
@@ -267,10 +257,10 @@ void UARTPC_Transmit(uint8_t *command, uint8_t size)
 	// PC als auch vom Modem
 	//if (HAL_UART_Transmit_IT(&UartHandle_PC, aRx_PC_Buffer, ptr_tx_pc_count)
 	HAL_StatusTypeDef hola = HAL_UART_Transmit_IT(&UartHandle_PC, command, size);
-	if (hola != HAL_OK)
-	{
-		Error_HandlerPC();
-	}
+//	if (hola != HAL_OK)
+//	{
+//		Error_HandlerPC();
+//	}
 }
 
 void UARTPC_SaveChar()

@@ -4,6 +4,7 @@
 #include "led_button.h"
 #include "protocol.h"
 #include "GSM_TIM.h"
+#include "gsm_adapter.h"
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -47,6 +48,9 @@ int main(void)
 	 - BaudRate = 9600 baud
 	 - Hardware flow control disabled (RTS and CTS signals) */
 	protocol_Init();
+	at_adapter_init();
+
+	//at_cmd( "AT" );
 
 	/* Infinite loop */
 	while (1)
@@ -55,7 +59,7 @@ int main(void)
 		{
 			/* Call the protocol handler each 1ms and clear global interrupt variable*/
 			reset_osTicks();
-			protocol_Handler();
+			//protocol_Handler();
 			gsm_process();
 		}
 	}

@@ -8,6 +8,7 @@
 #include "GSM_Modul.h"
 #include "GSM_DIO.h"
 #include "GSM_UART.h"
+#include "led_button.h"
 
 extern uint8_t aRx_PC_Buffer[100];
 extern __IO uint8_t ptr_tx_x_count;
@@ -22,6 +23,7 @@ void GSM_Modul_ConfigComm()
 	HAL_Delay(100);
 	GSM_DIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
 	HAL_Delay(12500);
+	BSP_LED_Toggle(LED5);
 }
 
 void GSM_Modul_sendATCommand()

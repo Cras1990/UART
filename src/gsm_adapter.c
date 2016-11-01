@@ -20,6 +20,7 @@
  *******************************************************************************/
 #include "gsm_adapter.h"
 #include "GSM_Modul.h"
+#include "GSM_UART.h"
 //#include "gsm_hal.h"
 /******************************************************************************
  * Module Preprocessor Constants
@@ -91,13 +92,13 @@ void at_adapter_init(void)
 	err_f = false;
 
 	//gsm_engine variable initialisations
-  exception_f   = false;
-  response_f    = false;
-  cue_f         = false;
+	exception_f = false;
+	response_f = false;
+	cue_f = false;
 
 	strcpy(error, (char*) AT_CMS_ERROR);
 
-	//memset( ( void* )tx_buffer, 0, AT_TRANSFER_SIZE );
+	memset((void*) tx_buffer, 0, AT_TRANSFER_SIZE);
 	memset((void*) rx_buffer, 0, AT_TRANSFER_SIZE);
 }
 
@@ -127,58 +128,66 @@ uint16_t get_rx_idx()
 
 int at_adapter_tx(char tx_input)
 {
-//#ifdef GSM1_CLICK
-//
-//#endif
-//#ifdef GSM2_CLICK
-//    if( tx_input != '\0' )
-//    {
-//        tx_buffer[ tx_idx++ ] = tx_input;
-//
-//    } else {
-//
-//        if( !exception_f )
-//        {
-//            tx_buffer[ tx_idx++ ] = '\r';
-//            tx_buffer[ tx_idx++ ] = '\n';
-//            tx_buffer[ tx_idx ]   = '\0';
-//
-//        } else {
-//
-//            tx_buffer[ tx_idx++ ] = 0x1A;
-//            tx_buffer[ tx_idx++ ] = '\r';
-//            tx_buffer[ tx_idx ]   = '\0';
-//        }
-//
+#ifdef GSM1_CLICK
+
+#endif
+#ifdef GSM2_CLICK
+	if (tx_input != '\0')
+	{
+		tx_buffer[tx_idx++] = tx_input;
+
+	} else
+	{
+
+		if (!exception_f)
+		{
+			tx_buffer[tx_idx++] = '\r';
+			tx_buffer[tx_idx++] = '\n';
+			tx_buffer[tx_idx] = '\0';
+
+		} else
+		{
+
+			tx_buffer[tx_idx++] = 0x1A;
+			tx_buffer[tx_idx++] = '\r';
+			tx_buffer[tx_idx] = '\0';
+		}
+
 //        while( !gsm_tx_ctl() );
-//
-//        gsm_hal_write( tx_buffer );
-//        tx_idx = 0;
-//
-//        exception_f = false;
-//        response_f = false;
-//        cue_f = true;
-//
-//        return 1;
-//    }
-//
-//    if ( tx_idx == AT_TRANSFER_SIZE )
-//    {
-//        tx_buffer[ tx_idx ] = '\0';
-//
-//        while( !gsm_tx_ctl() );
-//
-//        gsm_hal_write( tx_buffer );
-//        tx_idx = 0;
-//
-//        return 0;
-//    }
-//    return 0;
-//#endif
-//#ifdef GSM_CLICK_3
-//
-//#endif
+		while (!GSM_Modul_txctrl())
+			;
+
+		//gsm_hal_write( tx_buffer );
+		UARTX_Transmit(tx_buffer, tx_idx);
+		tx_idx = 0;
+
+		exception_f = false;
+		response_f = false;
+		cue_f = true;
+
+		return 1;
+	}
+
+	if (tx_idx == AT_TRANSFER_SIZE)
+	{
+		tx_buffer[tx_idx] = '\0';
+
+		//        while( !gsm_tx_ctl() );
+		while (!GSM_Modul_txctrl())
+			;
+
+		//gsm_hal_write( tx_buffer );
+		UARTX_Transmit(tx_buffer, tx_idx);
+		tx_idx = 0;
+
+		return 0;
+	}
 	return 0;
+#endif
+#ifdef GSM_CLICK_3
+
+#endif
+//	return 0;
 }
 
 void at_adapter_rx(char rx_input)
