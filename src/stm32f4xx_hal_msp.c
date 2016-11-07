@@ -213,7 +213,16 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base) {
 
 		/* USER CODE END TIM2_MspInit 1 */
 	} else if (htim_base->Instance == TIM3) {
+		/* USER CODE BEGIN TIM2_MspInit 0 */
 
+		/* USER CODE END TIM2_MspInit 0 */
+		/* Peripheral clock enable */
+		__TIM3_CLK_ENABLE()
+		;
+		/* Peripheral interrupt init*/
+		HAL_NVIC_SetPriority(TIM3_IRQn, 15, 0);
+		HAL_NVIC_EnableIRQ(TIM3_IRQn);
+		/* USER CODE BEGIN TIM2_MspInit 1 */
 	}
 
 }

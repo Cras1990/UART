@@ -38,6 +38,8 @@ int main(void)
 	BSP_LED_Init(LED4);
 	BSP_LED_Init(LED5);
 	BSP_LED_Init(LED6);
+	/* Configure Key Button */
+	BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_EXTI);
 
 	/*##-1- Configure the UART peripheral ######################################*/
 	/* Put the USART peripheral in the Asynchronous mode (UART Mode) */
@@ -62,6 +64,10 @@ int main(void)
 			//protocol_Handler();
 			gsm_process();
 		}
+//		if (get_button_state() == 1) {      // Warte bis Knopf gedruckt wird
+////			BSP_LED_Toggle(LED6);
+//			reset_button_state();
+//		}
 	}
 
 }

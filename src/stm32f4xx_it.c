@@ -59,6 +59,7 @@
 extern UART_HandleTypeDef UartHandle_X;
 extern UART_HandleTypeDef UartHandle_PC;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -218,6 +219,36 @@ void TIM2_IRQHandler(void) {
 	// 'HAL_TIM_IRQHandler' aufgerufen
 	//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 	/* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+ * @brief This function handles TIM3 global interrupt.
+ */
+void TIM3_IRQHandler(void) {
+	/* USER CODE BEGIN TIM2_IRQn 0 */
+
+	/* USER CODE END TIM2_IRQn 0 */
+	HAL_NVIC_ClearPendingIRQ(TIM3_IRQn);
+	HAL_TIM_IRQHandler(&htim3);
+	/* USER CODE BEGIN TIM2_IRQn 1 */
+	// Ich kann entweder hier oder auch in der Methode 'HAL_TIM_PeriodElapsedCallback'
+	// etwas zum Ausfuehren eintippen, denn letztere wird auch in der Methode
+	// 'HAL_TIM_IRQHandler' aufgerufen
+	//HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
+	/* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+ * @brief This function handles EXTI line0 interrupt.
+ */
+void EXTI0_IRQHandler(void) {
+	/* USER CODE BEGIN EXTI0_IRQn 0 */
+
+	/* USER CODE END EXTI0_IRQn 0 */
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+	/* USER CODE BEGIN EXTI0_IRQn 1 */
+
+	/* USER CODE END EXTI0_IRQn 1 */
 }
 
 

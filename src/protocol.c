@@ -22,6 +22,7 @@ void protocol_Init()
 {
 	GSM_Modul_Init();
 	MX_TIM2_Init();
+	MX_TIM3_Init();
 }
 
 void protocol_Dispatcher()

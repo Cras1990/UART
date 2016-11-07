@@ -18,14 +18,15 @@ GPIO_TypeDef* BUTTON_PORT[BUTTONn] = { KEY_BUTTON_GPIO_PORT };
 const uint16_t BUTTON_PIN[BUTTONn] = { KEY_BUTTON_PIN };
 const uint8_t BUTTON_IRQn[BUTTONn] = { KEY_BUTTON_EXTI_IRQn };
 
-static volatile uint8_t button; // 1 pressed, muss spaeter in eine Methode umgewandelt werden
+static volatile uint8_t button = 0; // 1 pressed, muss spaeter in eine Methode umgewandelt werden
+extern TIM_HandleTypeDef htim3;
 
 /** @defgroup STM32F4_DISCOVERY_LOW_LEVEL_LED_Functions
  * @{
  */
 
-void set_button_state(void);
-void reset_button_state(void);
+
+extern void Error_HandlerTIM(void);
 
 /**
  * @brief  Configures LED GPIO.
@@ -143,6 +144,34 @@ void BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef Mode) {
 		HAL_NVIC_SetPriority((IRQn_Type) (BUTTON_IRQn[Button]), 14, 0);
 		HAL_NVIC_EnableIRQ((IRQn_Type) (BUTTON_IRQn[Button]));
 	}
+}
+
+/**
+ * @brief  EXTI line detection callbacks.
+ * 		   Methode wird zum Abfangen eines Interrupts, falls Button betaetigt wird
+ * @param  GPIO_Pin: Specifies the pins connected EXTI line
+ * @retval None
+ */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+
+	if (GPIO_Pin == KEY_BUTTON_PIN) {
+
+		if (get_button_state() == 0) { // Wurde Knopf zur Datenspeicherung gedrueckt?
+			set_button_state();	// Dann setze ensprechendes Signalisierungsbit
+		} else {
+			reset_button_state();// Sonst, signalisiere, dass Knopf erneut gedrueckt wurde, um Messung zu stoppen
+		}
+		BSP_LED_Toggle(LED6);
+
+		if (HAL_TIM_Base_Start_IT(&htim3) != HAL_OK) { // Initialisierung Timer3 zur Entprellung
+			/* Counter Enable Error */
+			Error_HandlerTIM();
+		}
+
+		HAL_NVIC_DisableIRQ(KEY_BUTTON_EXTI_IRQn); // Deaktivierung des Interrupts fuer den Button 2 Sekunde lang
+
+	}
+
 }
 
 /**
