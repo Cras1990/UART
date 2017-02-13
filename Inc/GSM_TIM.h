@@ -12,8 +12,9 @@
 
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
-uint8_t get_osTicks(void);
-void reset_osTicks(void);
+uint8_t GSM_TIM_get_osTicks(void);
+void GSM_TIM_reset_osTicks(void);
+void GSM_TIM_set_osTicks(void);
 
 
 #endif /* GSM_TIM_H_ */

@@ -13,7 +13,9 @@
 #include "GSM_TIM.h"
 #include "gsm_adapter.h"
 
-extern uint8_t aRx_PC_Buffer[100];
+//extern uint8_t aRx_PC_Buffer[100];
+uint8_t aRx_PC_Buffer[100];
+uint8_t aTx_PC_Buffer[100];
 
 static uint16_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2,
     uint16_t BufferLength);

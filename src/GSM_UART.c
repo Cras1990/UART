@@ -10,8 +10,8 @@ UART_HandleTypeDef UartHandle_PC;
 
 uint8_t aTxBuffer[100];
 //uint8_t aRxBuffer[100];
-uint8_t aRx_PC_Buffer[100];
-uint8_t aTx_PC_Buffer[100];
+extern uint8_t aRx_PC_Buffer[100];
+extern uint8_t aTx_PC_Buffer[100];
 __IO uint8_t ptr_tx_pc_count = 0;
 __IO uint8_t ptr_rx_pc_count = 0;
 __IO uint8_t aRx_PC_Buffer_dummy;
@@ -25,7 +25,6 @@ __IO ITStatus UartReady = RESET;
 extern void Error_HandlerPC(void);
 extern void Error_HandlerX(void);
 
-void UARTPC_SaveChar(void);
 void UART_Handler(UART_HandleTypeDef *UartHandle);
 
 void UARTX_Init()
@@ -47,7 +46,7 @@ void UARTX_Init()
 		Error_HandlerX();
 	}
 
-	//Init pwrkey pin
+	//Init pwrkey pin for GSM-Modul
 	UARTX_GSM_PinsInit();
 
 	/*##-4- Put UART peripheral in reception process ###########################*/
@@ -90,32 +89,25 @@ void UARTX_Transmit(uint8_t *command, uint8_t size)
 	/*##-2- Start the transmission process #####################################*/
 	/* While the UART in reception process, user can transmit data through
 	 "aTxBuffer" buffer */
-//	if (HAL_UART_Transmit_IT(&UartHandle_X, aRx_PC_Buffer, ptr_tx_pc_count) != HAL_OK) // Dieser Teil sollte durch Praeproz.Direktive ausgemacht werden
-	// wenn der PC keine Anweisungen an Modul schicken soll
-	//if (HAL_UART_Transmit_IT(&UartHandle_X, aRxBuffer, ptr_tx_pc_count) != HAL_OK)
 	if (HAL_UART_Transmit_IT(&UartHandle_X, command, size) != HAL_OK)
 	{
 		Error_HandlerX();
 	}
 }
 
-//void UARTX_SaveChar()
-//{
-//	aRxBuffer[ptr_rx_x_count++] = aRx_X_Buffer_dummy;
-//}
 
 void UART_Handler(UART_HandleTypeDef *UartHandle)
 {
 	if (UartHandle->Instance == USART2)
 	{
-		// start again the uart receive process
+		// receive or save data from GSM and start again the uart receive process
 		if (HAL_UART_Receive_IT(&UartHandle_PC, &aRx_PC_Buffer_dummy, 1) != HAL_OK)
 		{
 			Error_HandlerPC();
 		}
 	} else
 	{
-		// start again the uart receive process
+		// receive or save data from PC and start again the uart receive process
 		if (HAL_UART_Receive_IT(&UartHandle_X, &aRx_X_Buffer_dummy, 1) != HAL_OK)
 		{
 			Error_HandlerX();
@@ -134,36 +126,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
 	if (UartHandle->Instance == USARTx)
 	{
-
 		at_adapter_rx(aRx_X_Buffer_dummy);
-
 	} else if (UartHandle->Instance == USART2)
 	{
 		at_adapter_tx(aRx_PC_Buffer_dummy);
-//		// die Reihenfolge, wie folgende Aufrufe durchgeführt werden, spielt eine Rolle, also nicht vertauschen
-//		//speichere char in empfangsbuffer vom pc
-//		UARTPC_SaveChar();
-//		if (ptr_rx_pc_count == COUNTOF(aRx_PC_Buffer)
-//		    || aRx_PC_Buffer_dummy == '\r')
-//		{
-//			// copy the number of bytes to send to remote device
-//			ptr_tx_x_count = ptr_rx_pc_count;
-//			// reset the pointer to the pc_rx_buffer
-//			ptr_rx_pc_count = 0;
-//			// send the received command from pc to remote device
-//			//UARTPC_Transmit(aRx_PC_Buffer, ptr_tx_pc_count);
-//			//memcpy(aRxBuffer, aRx_PC_Buffer, ptr_tx_pc_count);
-//			/* Turn LED3 on: Transfer in reception process is correct */
-//			BSP_LED_Toggle(LED3);
-//			// data ready to be read or sent to remote device
-//			// wichtig: hier werden die Kommandos an den Modem
-//			// ueber polling gesendet. Dies kann spaeter zu Datenverlusten
-//			// fuehren. Deshalb muss dieser Fall spaeter optimiert werden,
-//			// wenn keine Daten ueber PC an den Modem gesendet werden sollen,
-//			// sondern diese schon eigenstaendig vom uC gesendet werden.
-//			// status: not already implemented!!
-//			UART_SetStatus(SET);
-//		}
 	}
 	// reactivate on the receive process once again
 	UART_Handler(UartHandle);
@@ -181,13 +147,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 	if (UartHandle->Instance == USARTx)
 	{
 		/* Set transmission flag: transfer complete */
-//		UARTX_SetStatus(SET);
-//		/* Turn LED5 on: Transfer in transmission process to modem is correct */
-//		BSP_LED_On(LED4);
-	} else if (UartHandle->Instance == USART2) // dies wird wahrsch. nicht gebraucht. Ich sollte wahrscheinlich USART2 nur als empfaenger Einstellen
+		// do something
+
+	} else if (UartHandle->Instance == USART2)
 	{
-		/* Turn LED5 on: Transfer in transmition process to PC is correct */
-//		BSP_LED_Toggle(LED5);
+		/* Set transmission flag: transfer complete */
+		// do something
 	}
 }
 
@@ -241,7 +206,6 @@ void UART_PC_Init()
 	{
 		Error_HandlerPC();
 	}
-	//MX_TIM2_Init();
 
 	/*##-4- Put UART peripheral in reception process ###########################*/
 	if (HAL_UART_Receive_IT(&UartHandle_PC, &aRx_PC_Buffer_dummy, 1) != HAL_OK)
@@ -252,18 +216,8 @@ void UART_PC_Init()
 
 void UARTPC_Transmit(uint8_t *command, uint8_t size)
 {
-	// hierbei gehe ich davon aus, dass der buffer aRxBuffer
-	// sowohl fürs Abspeichern von einkommenden Daten vom
-	// PC als auch vom Modem
-	//if (HAL_UART_Transmit_IT(&UartHandle_PC, aRx_PC_Buffer, ptr_tx_pc_count)
-	HAL_StatusTypeDef hola = HAL_UART_Transmit_IT(&UartHandle_PC, command, size);
-//	if (hola != HAL_OK)
-//	{
-//		Error_HandlerPC();
-//	}
+	// send data to PC
+	HAL_UART_Transmit_IT(&UartHandle_PC, command, size);
 }
 
-void UARTPC_SaveChar()
-{
-	aRx_PC_Buffer[ptr_rx_pc_count++] = aRx_PC_Buffer_dummy;
-}
+

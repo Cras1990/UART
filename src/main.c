@@ -2,16 +2,15 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
 #include "led_button.h"
-#include "protocol.h"
 #include "GSM_TIM.h"
+#include "GSM_Modul.h"
 #include "gsm_adapter.h"
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-//TIM_HandleTypeDef htim2;
-///* Private function prototypes -----------------------------------------------*/
-//static void MX_TIM2_Init(void);
+
+/* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 void Error_HandlerPC(void);
 void Error_HandlerX(void);
@@ -47,27 +46,23 @@ int main(void)
 	 - Word Length = 8 Bits
 	 - Stop Bit = One Stop bit
 	 - Parity = None
-	 - BaudRate = 9600 baud
+	 - BaudRate GSM = 9600 baud
+	 - BaudRate GSM = 115200 baud
 	 - Hardware flow control disabled (RTS and CTS signals) */
-	protocol_Init();
+	GSM_Modul_Init();
+	MX_TIM2_Init();
+	MX_TIM3_Init();
 	at_adapter_init();
-
-	//at_cmd( "AT" );
 
 	/* Infinite loop */
 	while (1)
 	{
-		while (get_osTicks() > 0u)
+		while (GSM_TIM_get_osTicks() > 0u)
 		{
 			/* Call the protocol handler each 1ms and clear global interrupt variable*/
-			reset_osTicks();
-			//protocol_Handler();
+			GSM_TIM_reset_osTicks();
 			gsm_process();
 		}
-//		if (get_button_state() == 1) {      // Warte bis Knopf gedruckt wird
-////			BSP_LED_Toggle(LED6);
-//			reset_button_state();
-//		}
 	}
 
 }

@@ -32,22 +32,12 @@ void MX_TIM2_Init() {
 /* TIM3 init function */
 void MX_TIM3_Init(void) {
 
-//	TIM_ClockConfigTypeDef sClockSourceConfig;
-//	TIM_MasterConfigTypeDef sMasterConfig;
-
 	htim3.Instance = TIM3;
 	htim3.Init.Prescaler = 16800;
 	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim3.Init.Period = 10000;                    // Timer eingestellt bei 2s
 	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	HAL_TIM_Base_Init(&htim3);
-
-//	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-//	HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig);
-//
-//	sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
-//	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-//	HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig);
 
 }
 
@@ -62,7 +52,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim->Instance == TIM2)
 	{
 
-		osTicks++; //ueberlauf, wenn ich dies nicht handle
+		GSM_TIM_set_osTicks();
 		BSP_LED_Toggle(LED3);
 
 	} else if (htim->Instance == TIM3) {
@@ -78,7 +68,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	}
 }
 
-uint8_t get_osTicks()
+// get the value of the Variable that signalizes the 1ms time elapsed
+uint8_t GSM_TIM_get_osTicks()
 {
 	if(osTicks > 0)
 		return 1;
@@ -86,7 +77,15 @@ uint8_t get_osTicks()
 		return 0;
 }
 
-void reset_osTicks()
+// reset the value of the Variable that signalizes the 1ms time elapsed, to
+// count again 1ms
+void GSM_TIM_reset_osTicks()
 {
 	osTicks--;
+}
+
+// set the value of the Variable to signalize that the 1ms time is elapsed
+void GSM_TIM_set_osTicks()
+{
+	osTicks++; //Ueberlauf, wenn ich dies nicht handle
 }
